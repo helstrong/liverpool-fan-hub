@@ -10,10 +10,14 @@ import { fetchNews } from './server/news.js'
 // /api/news isn't a simple pass-through (it fetches, parses and filters an RSS
 // feed — see server/news.js), so it's wired up as dev middleware here, sharing
 // the exact same logic the production Express server uses.
-function newsDevMiddleware() {
+function newsDevMiddleware(key: string) {
   return {
     name: 'news-dev-middleware',
     configureServer(server) {
+      server.middlewares.use('/api/meta', (_req, res) => {
+        res.setHeader('Content-Type', 'application/json')
+        res.end(JSON.stringify({ freeTier: key === '123' }))
+      })
       server.middlewares.use('/api/news', async (_req, res) => {
         try {
           const items = await fetchNews()
@@ -107,7 +111,7 @@ export default defineConfig(({ mode }) => {
   const base = env.SPORTSDB_UPSTREAM?.trim() || 'https://www.thesportsdb.com'
 
   return {
-    plugins: [react(), newsDevMiddleware(), pwa()],
+    plugins: [react(), newsDevMiddleware(key), pwa()],
     server: {
       proxy: {
         '/api/sportsdb': {

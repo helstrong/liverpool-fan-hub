@@ -105,6 +105,14 @@ function writeCache(data: AppData) {
   }
 }
 
+// Asks the server whether it's running on the free key. Cheap, and the only
+// way the browser can know: the key itself never leaves the server.
+async function fetchMeta(): Promise<{ freeTier: boolean }> {
+  const res = await fetch('/api/meta')
+  if (!res.ok) throw new Error(`meta: HTTP ${res.status}`)
+  return res.json()
+}
+
 export async function loadAll(force = false): Promise<AppData> {
   if (!USE_LIVE) return sampleData()
 
@@ -113,16 +121,24 @@ export async function loadAll(force = false): Promise<AppData> {
     if (cached) return cached
   }
 
-  const [club, standings, fixtures, players, kits, news] = await Promise.allSettled([
+  const [club, standings, fixtures, players, kits, news, meta] = await Promise.allSettled([
     fetchClub(),
     fetchStandings(),
     fetchFixtures(),
     fetchPlayers(),
     fetchKits(),
     fetchNews(),
+    fetchMeta(),
   ])
 
   const warnings: string[] = []
+  // Worth saying loudly: on the free key the data isn't wrong so much as
+  // truncated — a five-row table and a couple of fixtures — which otherwise
+  // just looks like the app being out of date.
+  if (meta.status === 'fulfilled' && meta.value.freeTier)
+    warnings.push(
+      'Limited data — the server is using TheSportsDB’s free key, which caps the table to five rows and returns only a handful of fixtures. Set SPORTSDB_KEY to a paid key for the full season.',
+    )
   if (standings.status === 'rejected')
     warnings.push(`Standings unavailable — ${String(standings.reason?.message ?? standings.reason)}`)
   if (fixtures.status === 'rejected')

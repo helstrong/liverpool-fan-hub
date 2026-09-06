@@ -83,6 +83,16 @@ app.get('/api/sportsdb/:endpoint', async (req, res) => {
   }
 })
 
+// Whether the server is running on TheSportsDB's free key. The client can't
+// work this out for itself — the key never leaves the server — and the
+// VITE_SPORTSDB_FREE_TIER build flag can't be set through the Dockerfile, so
+// without this a deployment missing SPORTSDB_KEY silently serves capped data
+// under a confident "Live" badge.
+app.get('/api/meta', (_req, res) => {
+  res.set('Cache-Control', 'no-cache')
+  res.json({ freeTier: KEY === '123' })
+})
+
 app.get('/api/news', async (_req, res) => {
   try {
     const items = await fetchNews()
