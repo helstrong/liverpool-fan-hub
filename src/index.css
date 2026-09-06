@@ -1,0 +1,25 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  /* The club red is the surface, not a header stripe — so the whole app is
+     dark and native form controls need to render dark to match. */
+  color-scheme: dark;
+}
+
+body {
+  @apply bg-lfc-maroon-dark text-white antialiased;
+  font-family: Inter, system-ui, sans-serif;
+  /* With viewport-fit=cover the page runs edge to edge, so in landscape on a
+     notched phone these keep content out from under the cutout. Both resolve
+     to 0 in a normal browser tab, so the web layout is unaffected. */
+  padding-left: env(safe-area-inset-left);
+  padding-right: env(safe-area-inset-right);
+}
+
+/* Scores, ranks and counters are set in Oswald at large sizes, where
+   proportional digits visibly jitter as a countdown ticks. */
+.font-display {
+  font-variant-numeric: tabular-nums;
+}
