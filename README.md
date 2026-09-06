@@ -92,10 +92,10 @@ are the only route to shipping a fix if a bad service worker ever goes out.
 
 ## Crest
 
-`public/crest.svg` and `src/components/Crest.tsx` are a plain **LFC monogram
-placeholder**, not the club's emblem, which is a registered trademark. It is
-only a fallback for when the data source hasn't supplied a badge — with live
-data the API's own crest renders instead.
+The club crest shown in the app, the favicon and the installed app icons is
+Liverpool FC's badge as supplied by TheSportsDB, bundled at `public/crest.png`.
+It is a registered trademark of Liverpool Football Club and is used here only to
+identify the club in an unofficial supporters' project.
 
 ## Attribution
 

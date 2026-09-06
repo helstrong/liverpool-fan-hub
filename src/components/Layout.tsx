@@ -3,7 +3,6 @@ import { NavLink } from 'react-router-dom'
 import Crest from './Crest'
 import Footer from './Footer'
 import Icon from './Icon'
-import LanguageToggle from './LanguageToggle'
 import { useI18n } from '../i18n/I18nContext'
 import type { TranslationKey } from '../i18n/strings'
 
@@ -62,8 +61,6 @@ export default function Layout({ children, live = false, onRefresh, refreshing =
                 </NavLink>
               ))}
             </nav>
-
-            <LanguageToggle />
 
             {/* Whether the numbers on screen came from the live provider or the
                 bundled sample set — worth stating plainly, not just implying. */}
