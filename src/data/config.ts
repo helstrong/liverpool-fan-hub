@@ -37,8 +37,8 @@ export const IS_FREE_KEY = env.VITE_SPORTSDB_FREE_TIER?.trim() === 'true'
 // Highlight id must match the team id used by whichever source is active.
 export const CLUB_ID = USE_LIVE ? String(TEAM_ID) : 'lfc'
 
-// How long to cache a successful live fetch in the browser. An hour meant a
-// finished match could take that long to show up on top of whatever lag the
-// provider already had; 15 minutes keeps it current without adding real load,
-// since the server holds its own 10-minute cache in front of the upstream API.
-export const CACHE_TTL_MS = 15 * 60 * 1000
+// How long the browser holds the whole AppData bundle. This stacks on top of
+// the server's own window, so 15 minutes here meant a finished match could take
+// around 25 minutes to surface. Five keeps it current without real extra load,
+// since most refetches are answered from the server's cache anyway.
+export const CACHE_TTL_MS = 5 * 60 * 1000

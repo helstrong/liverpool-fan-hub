@@ -36,7 +36,15 @@ const ALLOWED = new Set([
 ])
 
 // Small in-memory cache: cuts upstream calls and blunts quota abuse.
-const CACHE_TTL_MS = 10 * 60 * 1000
+//
+// Split by how fast each endpoint actually changes. Scores, the next fixture
+// and the table move during a matchday and are what makes the app feel stale;
+// a season's full fixture list, the roster and the club profile do not. Giving
+// them all the same ten minutes meant waiting on the slowest-moving data.
+const VOLATILE_TTL_MS = 2 * 60 * 1000
+const STABLE_TTL_MS = 10 * 60 * 1000
+const VOLATILE = new Set(['eventslast.php', 'eventsnext.php', 'lookuptable.php'])
+const ttlFor = (endpoint) => (VOLATILE.has(endpoint) ? VOLATILE_TTL_MS : STABLE_TTL_MS)
 const cache = new Map()
 
 const app = express()
@@ -56,8 +64,9 @@ app.get('/api/sportsdb/:endpoint', async (req, res) => {
   const qs = new URLSearchParams(req.query).toString()
   const cacheKey = `${endpoint}?${qs}`
 
+  const ttl = ttlFor(endpoint)
   const hit = cache.get(cacheKey)
-  if (hit && Date.now() - hit.at < CACHE_TTL_MS) return res.json(hit.body)
+  if (hit && Date.now() - hit.at < ttl) return res.json(hit.body)
 
   const url = `${UPSTREAM}/api/v1/json/${KEY}/${endpoint}${qs ? `?${qs}` : ''}`
   try {
@@ -65,7 +74,9 @@ app.get('/api/sportsdb/:endpoint', async (req, res) => {
     if (!upstream.ok) return res.status(upstream.status).json({ error: `upstream ${upstream.status}` })
     const body = await upstream.json()
     cache.set(cacheKey, { at: Date.now(), body })
-    res.set('Cache-Control', 'public, max-age=600')
+    // Mirror the server-side window so a browser or CDN in front doesn't hold
+    // a copy for longer than we would.
+    res.set('Cache-Control', `public, max-age=${Math.floor(ttl / 1000)}`)
     res.json(body)
   } catch {
     res.status(502).json({ error: 'upstream request failed' })
