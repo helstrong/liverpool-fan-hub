@@ -84,8 +84,24 @@ hiding them:
 ## Deployment
 
 `Dockerfile` builds the SPA and serves it with the Express proxy
-(`server/index.js`). Set `SPORTSDB_KEY` in the host's environment; leave
-`VITE_SEASON` unset so the season follows the calendar.
+(`server/index.js`).
+
+> ⚠️ **`.env` is not shipped to deployments.** It's excluded by both
+> `.gitignore` and `.dockerignore` on purpose, so the key is never committed
+> or baked into an image. That means a host like Coolify never sees it — set
+> `SPORTSDB_KEY` in the host's own environment variables instead, as a
+> **runtime** (not build-time) value. Without it the server falls back to
+> TheSportsDB's free `123` key, which caps the table to five rows and returns
+> only a handful of fixtures — the app looks out of date rather than
+> misconfigured.
+
+Leave `VITE_SEASON` unset so the season follows the calendar. On boot the
+server logs which key it picked up:
+
+```
+liverpool-fan-hub listening on :3000 (key set)        # configured
+liverpool-fan-hub listening on :3000 (key FREE 123)   # falling back
+```
 
 The service worker and `index.html` are served `no-cache` deliberately — they
 are the only route to shipping a fix if a bad service worker ever goes out.

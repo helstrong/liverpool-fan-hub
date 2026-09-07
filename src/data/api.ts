@@ -137,7 +137,7 @@ export async function loadAll(force = false): Promise<AppData> {
   // just looks like the app being out of date.
   if (meta.status === 'fulfilled' && meta.value.freeTier)
     warnings.push(
-      'Limited data — the server is using TheSportsDB’s free key, which caps the table to five rows and returns only a handful of fixtures. Set SPORTSDB_KEY to a paid key for the full season.',
+      'Limited data — no SPORTSDB_KEY is set on the server, so it fell back to TheSportsDB’s free key, which caps the table to five rows and returns only a handful of fixtures. Note a .env file is not shipped to deployments: set SPORTSDB_KEY in the host’s environment.',
     )
   if (standings.status === 'rejected')
     warnings.push(`Standings unavailable — ${String(standings.reason?.message ?? standings.reason)}`)
